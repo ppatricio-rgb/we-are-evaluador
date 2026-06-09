@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>We Are — Evaluador de Entrevistas</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --orange: #ea4f29;
+    --navy: #052848;
+    --navy2: #0a3d6b;
+    --bg: #f7f8fa;
+    --surface: #ffffff;
+    --border: #e2e6ed;
+    --text: #1a2332;
+    --muted: #6b7a8f;
+    --light: #f0f3f8;
+    --green: #22c55e;
+    --yellow: #f59e0b;
+    --red: #ef4444;
+    --blue: #3b82f6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: var(--navy);
+    padding: 0 32px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 28px;
+    height: 28px;
+    background: var(--orange);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 13px;
+    color: white;
+  }
+  .header-title {
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .header-sub {
+    color: rgba(255,255,255,0.45);
+    font-size: 12px;
+    font-weight: 400;
+  }
+  .tab-nav {
+    display: flex;
+    gap: 4px;
+  }
+  .tab-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+  }
+  .tab-btn.active {
+    background: rgba(255,255,255,0.12);
+    color: white;
+  }
+  .tab-btn:hover:not(.active) {
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* PAGES */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  /* EVALUATE PAGE */
+  .eval-layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 16px;
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 14px;
+  }
+
+  /* Role selector */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .role-chip {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--light);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: left;
+  }
+  .role-chip:hover {
+    border-color: var(--orange);
+    background: #fff5f2;
+  }
+  .role-chip.selected {
+    border-color: var(--orange);
+    background: #fff5f2;
+    box-shadow: 0 0 0 3px rgba(234,79,41,0.1);
+  }
+  .role-chip-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .role-chip-area {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* Candidate info */
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .form-input {
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s;
+    outline: none;
+  }
+  .form-input:focus {
+    border-color: var(--orange);
+    background: white;
+  }
+
+  /* Input toggle */
+  .input-toggle {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 14px;
+    background: var(--light);
+    padding: 4px;
+    border-radius: 8px;
+    width: fit-content;
+  }
+  .toggle-btn {
+    padding: 6px 16px;
+    border-radius: 6px;
+    border: none;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .toggle-btn.active {
+    background: white;
+    color: var(--text);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  }
+
+  /* PDF dropzone */
+  .pdf-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 36px 20px;
+    border: 2px dashed var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+    text-align: center;
+  }
+  .pdf-dropzone:hover, .pdf-dropzone.dragover {
+    border-color: var(--orange);
+    background: #fff5f2;
+  }
+  .pdf-icon { font-size: 32px; }
+  .pdf-label { font-size: 13px; color: var(--text); font-weight: 500; }
+  .pdf-sub { font-size: 11px; color: var(--muted); }
+
+  .pdf-loaded {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: #fff5f2;
+    border: 1.5px solid var(--orange);
+    border-radius: 10px;
+    margin-top: 8px;
+  }
+  .pdf-loaded-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--orange);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pdf-clear-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: inherit;
+  }
+  .pdf-clear-btn:hover { color: var(--red); }
+
+  /* Transcript */
+  .transcript-area {
+    width: 100%;
+    min-height: 180px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: var(--bg);
+    resize: vertical;
+    outline: none;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .transcript-area:focus {
+    border-color: var(--orange);
+    background: white;
+  }
+
+  /* Selected role preview */
+  .role-preview {
+    display: none;
+    margin-top: 12px;
+    padding: 10px 14px;
+    background: var(--light);
+    border-radius: 8px;
+    border-left: 3px solid var(--orange);
+  }
+  .role-preview.show { display: block; }
+  .role-preview-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--orange);
+  }
+  .role-preview-jd {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+    line-height: 1.5;
+    max-height: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Analyze button */
+  .analyze-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: -0.2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .analyze-btn:hover:not(:disabled) {
+    background: #d4401f;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(234,79,41,0.3);
+  }
+  .analyze-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  /* Loading */
+  .loading-state {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  .loading-state.show { display: block; }
+  .spinner {
+    width: 36px;
+    height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--orange);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .loading-step {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 6px;
+    min-height: 18px;
+  }
+
+  /* RESULT */
+  .result-card {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .result-card.show { display: block; }
+
+  .result-header {
+    padding: 20px 24px;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .result-candidate {
+    color: white;
+  }
+  .result-candidate-name {
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .result-candidate-role {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    margin-top: 2px;
+  }
+
+  .verdict-badge {
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+  .verdict-apto { background: rgba(34,197,94,0.2); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .verdict-potencial { background: rgba(245,158,11,0.2); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+  .verdict-no-apto { background: rgba(239,68,68,0.2); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+
+  .result-body {
+    padding: 24px;
+  }
+
+  .quartile-display {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--light);
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .quartile-number {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--orange);
+    line-height: 1;
+    letter-spacing: -2px;
+  }
+  .quartile-info {}
+  .quartile-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+  .quartile-desc {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 2px;
+  }
+  .quartile-range {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+
+  .result-sections {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 600px) {
+    .result-sections { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  .result-section {
+    padding: 14px 16px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .result-section-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .result-section ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .result-section ul li {
+    font-size: 12.5px;
+    color: var(--text);
+    line-height: 1.5;
+    padding-left: 12px;
+    position: relative;
+  }
+  .result-section ul li::before {
+    content: '–';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+  }
+
+  .result-summary {
+    padding: 16px;
+    background: var(--light);
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+    margin-bottom: 16px;
+    border-left: 3px solid var(--orange);
+  }
+
+  .score-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .score-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .score-item-label {
+    font-size: 12px;
+    color: var(--muted);
+    width: 150px;
+    flex-shrink: 0;
+  }
+  .score-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .score-bar {
+    height: 100%;
+    border-radius: 3px;
+    background: var(--orange);
+    transition: width 0.8s ease;
+  }
+  .score-val {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text);
+    width: 28px;
+    text-align: right;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .action-btn {
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: white;
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  .action-btn:hover {
+    border-color: var(--navy);
+    background: var(--light);
+  }
+  .action-btn.primary {
+    background: var(--navy);
+    color: white;
+    border-color: var(--navy);
+  }
+  .action-btn.primary:hover {
+    background: var(--navy2);
+  }
+
+  /* ROLES PAGE */
+  .roles-layout {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .page-header-text h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 3px;
+  }
+  .add-role-btn {
+    padding: 9px 16px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .add-role-btn:hover {
+    background: #d4401f;
+  }
+
+  .roles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .role-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .role-item-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .role-item-header:hover { background: var(--light); }
+  .role-item-meta {}
+  .role-item-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .role-item-area {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+  .role-item-actions {
+    display: flex;
+    gap: 6px;
+  }
+  .icon-btn {
+    padding: 5px 10px;
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .icon-btn:hover { border-color: var(--orange); color: var(--orange); }
+  .icon-btn.danger:hover { border-color: var(--red); color: var(--red); }
+
+  .role-item-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--border);
+  }
+  .role-item-body.open { display: block; }
+
+  .jd-display {
+    font-size: 12.5px;
+    color: var(--muted);
+    line-height: 1.65;
+    white-space: pre-wrap;
+    margin-top: 12px;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 40, 72, 0.6);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 540px;
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+  }
+  .modal-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 20px;
+  }
+  .modal-cancel {
+    padding: 9px 18px;
+    border: 1.5px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .modal-save {
+    padding: 9px 18px;
+    background: var(--orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  textarea.form-input {
+    min-height: 140px;
+    resize: vertical;
+    line-height: 1.6;
+  }
+
+  /* HISTORY PAGE */
+  .history-layout {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 32px 24px;
+  }
+  .history-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+  }
+  .history-empty-icon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  .history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .history-item {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.15s;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .history-item:hover {
+    border-color: var(--orange);
+    box-shadow: 0 2px 8px rgba(234,79,41,0.08);
+  }
+  .history-item-left {}
+  .history-item-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .history-item-meta {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .history-item-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .history-quartile {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--orange);
+  }
+
+  /* Toast */
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--navy);
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: all 0.25s;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Empty state */
+  .empty-roles-msg {
+    text-align: center;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-mark">W</div>
+    <div>
+      <div class="header-title">We Are · Evaluador de Entrevistas</div>
+    </div>
+  </div>
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="showPage('evaluate')">Evaluar</button>
+    <button class="tab-btn" onclick="showPage('roles')">Roles</button>
+    <button class="tab-btn" onclick="showPage('history')">Historial</button>
+  </nav>
+</div>
+
+<!-- EVALUATE PAGE -->
+<div id="page-evaluate" class="page active">
+  <div class="eval-layout">
+
+    <div class="card">
+      <div class="section-label">Paso 1</div>
+      <div class="card-title">Seleccioná el rol a evaluar</div>
+      <div class="role-grid" id="roleGrid">
+        <div class="empty-roles-msg" id="noRolesMsg">No hay roles cargados aún. <a href="#" onclick="showPage('roles')" style="color:var(--orange)">Agregá uno</a> para empezar.</div>
+      </div>
+      <div class="role-preview" id="rolePreview">
+        <div class="role-preview-name" id="previewName"></div>
+        <div class="role-preview-jd" id="previewJd"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Paso 2</div>
+      <div class="card-title">Datos del candidato</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre completo</label>
+          <input class="form-input" type="text" id="candidateName" placeholder="Ej: Valentina García">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Fecha de entrevista</label>
+          <input class="form-input" type="date" id="interviewDate">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-label">Paso 3</div>
+      <div class="card-title">Transcripción de la entrevista</div>
+
+      <div class="input-toggle">
+        <button class="toggle-btn active" id="btnText" onclick="switchInput('text')">Pegar texto</button>
+        <button class="toggle-btn" id="btnPdf" onclick="switchInput('pdf')">Subir PDF</button>
+      </div>
+
+      <div id="inputText">
+        <textarea class="transcript-area" id="transcriptInput" placeholder="Pegá acá la transcripción completa de la entrevista. Puede ser texto plano, con nombres de hablantes, o notas del entrevistador.&#10;&#10;Cuanto más completa, más precisa la evaluación."></textarea>
+      </div>
+
+      <div id="inputPdf" style="display:none">
+        <label class="pdf-dropzone" id="pdfDropzone" for="pdfFileInput">
+          <div class="pdf-icon">📄</div>
+          <div class="pdf-label">Arrastrá el PDF acá o <span style="color:var(--orange);text-decoration:underline;cursor:pointer">hacé click para elegirlo</span></div>
+          <div class="pdf-sub">Transcripciones, notas de entrevista, cualquier PDF</div>
+        </label>
+        <input type="file" id="pdfFileInput" accept=".pdf" style="display:none" onchange="handlePdfUpload(event)">
+        <div class="pdf-loaded" id="pdfLoaded" style="display:none">
+          <div class="pdf-loaded-name" id="pdfLoadedName"></div>
+          <button class="pdf-clear-btn" onclick="clearPdf()">✕ Quitar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loadingState" class="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">Analizando entrevista...</div>
+      <div class="loading-step" id="loadingStep">Procesando transcripción</div>
+    </div>
+
+    <button class="analyze-btn" id="analyzeBtn" onclick="analyzeInterview()">
+      <span>⚡</span> Evaluar candidato
+    </button>
+
+    <div class="result-card" id="resultCard">
+      <div class="result-header">
+        <div class="result-candidate">
+          <div class="result-candidate-name" id="resultName"></div>
+          <div class="result-candidate-role" id="resultRole"></div>
+        </div>
+        <div class="verdict-badge" id="verdictBadge"></div>
+      </div>
+      <div class="result-body">
+
+        <div class="quartile-display">
+          <div class="quartile-number" id="quartileNum">—</div>
+          <div class="quartile-info">
+            <div class="quartile-label">Cuartil estimado</div>
+            <div class="quartile-desc" id="quartileDesc"></div>
+            <div class="quartile-range" id="quartileRange"></div>
+          </div>
+        </div>
+
+        <div class="result-summary" id="resultSummary"></div>
+
+        <div style="margin-bottom:8px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;color:var(--muted)">Dimensiones evaluadas</div>
+        <div class="score-row" id="scoreRow"></div>
+
+        <div class="result-sections">
+          <div class="result-section" style="border-top: 3px solid var(--green)">
+            <div class="result-section-title" style="color:var(--green)">
+              <div class="dot" style="background:var(--green)"></div>
+              Fortalezas
+            </div>
+            <ul id="strengthsList"></ul>
+          </div>
+          <div class="result-section" style="border-top: 3px solid var(--red)">
+            <div class="result-section-title" style="color:var(--red)">
+              <div class="dot" style="background:var(--red)"></div>
+              Gaps / riesgos
+            </div>
+            <ul id="gapsList"></ul>
+          </div>
+        </div>
+
+        <div class="result-section" style="margin-bottom:16px; border-top: 3px solid var(--blue)">
+          <div class="result-section-title" style="color:var(--blue)">
+            <div class="dot" style="background:var(--blue)"></div>
+            Preguntas de seguimiento sugeridas
+          </div>
+          <ul id="followupList"></ul>
+        </div>
+
+        <div class="result-actions">
+          <button class="action-btn primary" onclick="saveToHistory()">Guardar en historial</button>
+          <button class="action-btn" onclick="resetEval()">Nueva evaluación</button>
+          <button class="action-btn" onclick="printResult()">Imprimir / PDF</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ROLES PAGE -->
+<div id="page-roles" class="page">
+  <div class="roles-layout">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2>Gestión de Roles</h2>
+        <p>Cargá las job descriptions para cada puesto de la empresa.</p>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="action-btn" onclick="openAreasModal()" style="border-color:var(--border)">⚙ Áreas</button>
+        <button class="add-role-btn" onclick="openRoleModal()">+ Agregar rol</button>
+      </div>
+    </div>
+    <div class="roles-list" id="rolesList">
+      <div class="empty-roles-msg">No hay roles cargados aún.</div>
+    </div>
+  </div>
+</div>
+
+<!-- HISTORY PAGE -->
+<div id="page-history" class="page">
+  <div class="history-layout">
+    <div class="page-header">
+      <div class="page-header-text">
+        <h2>Historial de Evaluaciones</h2>
+        <p>Todas las evaluaciones guardadas en esta sesión.</p>
+      </div>
+      <button class="action-btn danger" onclick="clearHistory()" style="border-color:var(--border)">Limpiar</button>
+    </div>
+    <div id="historyContent"></div>
+  </div>
+</div>
+
+<!-- MODAL: Add/Edit Role -->
+<div class="modal-overlay" id="roleModal">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Agregar Rol</div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">Nombre del rol</label>
+      <input class="form-input" type="text" id="modalRoleName" placeholder="Ej: Community Manager">
+    </div>
+    <div class="form-group" style="margin-bottom:12px">
+      <label class="form-label">Área</label>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="form-input" id="modalRoleArea" style="flex:1"></select>
+        <button type="button" onclick="showNewAreaInput()" style="padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:white;cursor:pointer;font-size:18px;line-height:1;color:var(--muted)" title="Nueva área">+</button>
+      </div>
+      <div id="newAreaRow" style="display:none;margin-top:8px;display:none;gap:6px;align-items:center">
+        <input class="form-input" type="text" id="newAreaInput" placeholder="Nueva área..." style="flex:1">
+        <button type="button" onclick="addNewArea()" style="padding:9px 14px;background:var(--orange);color:white;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap">Agregar</button>
+        <button type="button" onclick="hideNewAreaInput()" style="padding:9px 10px;border:1.5px solid var(--border);background:white;border-radius:8px;font-size:12px;cursor:pointer;color:var(--muted)">✕</button>
+      </div>
+    </div>
+    <div class="form-group" style="margin-bottom:4px">
+      <label class="form-label">Job Description</label>
+      <div class="input-toggle" style="margin-bottom:10px">
+        <button class="toggle-btn active" id="jdBtnText" onclick="switchJdInput('text')">Pegar texto</button>
+        <button class="toggle-btn" id="jdBtnPdf" onclick="switchJdInput('pdf')">Subir PDF</button>
+      </div>
+      <div id="jdInputText">
+        <textarea class="form-input" id="modalRoleJD" placeholder="Pegá acá la descripción del puesto, responsabilidades, requisitos, etc."></textarea>
+      </div>
+      <div id="jdInputPdf" style="display:none">
+        <label class="pdf-dropzone" id="jdPdfDropzone" for="jdPdfFileInput" style="padding:24px">
+          <div class="pdf-icon" style="font-size:24px">📄</div>
+          <div class="pdf-label">Arrastrá el PDF o <span style="color:var(--orange);text-decoration:underline">hacé click</span></div>
+          <div class="pdf-sub">PDF de la job description</div>
+        </label>
+        <input type="file" id="jdPdfFileInput" accept=".pdf" style="display:none" onchange="handleJdPdfUpload(event)">
+        <div class="pdf-loaded" id="jdPdfLoaded" style="display:none">
+          <div class="pdf-loaded-name" id="jdPdfLoadedName"></div>
+          <button class="pdf-clear-btn" onclick="clearJdPdf()">✕ Quitar</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeRoleModal()">Cancelar</button>
+      <button class="modal-save" onclick="saveRole()">Guardar rol</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Manage Areas -->
+<div class="modal-overlay" id="areasModal">
+  <div class="modal">
+    <div class="modal-title">Gestión de Áreas</div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Estas son las áreas disponibles para asignar a los roles.</p>
+    <div id="areasList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px"></div>
+    <div style="display:flex;gap:8px">
+      <input class="form-input" type="text" id="newAreaModalInput" placeholder="Nueva área..." style="flex:1" onkeydown="if(event.key==='Enter')addAreaFromModal()">
+      <button onclick="addAreaFromModal()" style="padding:9px 16px;background:var(--orange);color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Agregar</button>
+    </div>
+    <div class="modal-actions" style="border-top:1px solid var(--border);padding-top:16px;margin-top:16px">
+      <button class="modal-save" onclick="closeAreasModal()">Listo</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── STATE ──
+let roles = [];
+let selectedRoleId = null;
+let currentResult = null;
+let history = [];
+let editingRoleId = null;
+let pdfBase64 = null;
+let inputMode = 'text';
+let jdMode = 'text'; // 'text' | 'pdf'
+let jdPdfBase64 = null;
+let jdPdfText = null; // extracted text from JD PDF
+
+// ── AREAS ──
+let areas = ['Social Media', 'Proyectos', 'Diseño', 'Operaciones'];
+
+function renderAreaSelect() {
+  const sel = document.getElementById('modalRoleArea');
+  if (!sel) return;
+  const current = sel.value;
+  sel.innerHTML = areas.map(a => `<option value="${a}"${a === current ? ' selected' : ''}>${a}</option>`).join('');
+}
+
+function showNewAreaInput() {
+  const row = document.getElementById('newAreaRow');
+  row.style.display = 'flex';
+  document.getElementById('newAreaInput').focus();
+}
+function hideNewAreaInput() {
+  document.getElementById('newAreaRow').style.display = 'none';
+  document.getElementById('newAreaInput').value = '';
+}
+function addNewArea() {
+  const val = document.getElementById('newAreaInput').value.trim();
+  if (!val) return;
+  if (areas.includes(val)) { showToast('Esa área ya existe'); return; }
+  areas.push(val);
+  renderAreaSelect();
+  document.getElementById('modalRoleArea').value = val;
+  hideNewAreaInput();
+  showToast('Área agregada ✓');
+}
+
+// ── AREAS MODAL ──
+function openAreasModal() {
+  renderAreasList();
+  document.getElementById('areasModal').classList.add('open');
+}
+function closeAreasModal() {
+  document.getElementById('areasModal').classList.remove('open');
+}
+function renderAreasList() {
+  const el = document.getElementById('areasList');
+  el.innerHTML = areas.map((a, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--light);border-radius:8px">
+      <span style="flex:1;font-size:13px;font-weight:500">${a}</span>
+      <input type="text" value="${a}" id="areaEdit_${i}" style="display:none;flex:1;padding:5px 8px;border:1.5px solid var(--orange);border-radius:6px;font-size:13px;font-family:inherit" onkeydown="if(event.key==='Enter')saveAreaEdit(${i})">
+      <button onclick="toggleAreaEdit(${i})" style="padding:4px 10px;border:1px solid var(--border);background:white;border-radius:6px;font-size:11px;cursor:pointer;color:var(--muted);font-family:inherit" id="areaEditBtn_${i}">Editar</button>
+      <button onclick="deleteArea(${i})" style="padding:4px 10px;border:1px solid var(--border);background:white;border-radius:6px;font-size:11px;cursor:pointer;color:var(--red);font-family:inherit">✕</button>
+    </div>`).join('');
+}
+function toggleAreaEdit(i) {
+  const span = document.querySelector(`#areasList > div:nth-child(${i+1}) span`);
+  const input = document.getElementById(`areaEdit_${i}`);
+  const btn = document.getElementById(`areaEditBtn_${i}`);
+  if (input.style.display === 'none') {
+    span.style.display = 'none'; input.style.display = 'block'; input.focus(); btn.textContent = 'Guardar';
+  } else {
+    saveAreaEdit(i);
+  }
+}
+function saveAreaEdit(i) {
+  const val = document.getElementById(`areaEdit_${i}`).value.trim();
+  if (!val) return;
+  const old = areas[i];
+  areas[i] = val;
+  roles.forEach(r => { if (r.area === old) r.area = val; });
+  renderAreasList();
+  renderRoles();
+  renderRoleGrid();
+  showToast('Área actualizada ✓');
+}
+function deleteArea(i) {
+  if (roles.some(r => r.area === areas[i])) {
+    if (!confirm(`Hay roles asignados a "${areas[i]}". ¿Eliminás el área igual?`)) return;
+  }
+  areas.splice(i, 1);
+  renderAreasList();
+  showToast('Área eliminada');
+}
+function addAreaFromModal() {
+  const val = document.getElementById('newAreaModalInput').value.trim();
+  if (!val) return;
+  if (areas.includes(val)) { showToast('Esa área ya existe'); return; }
+  areas.push(val);
+  document.getElementById('newAreaModalInput').value = '';
+  renderAreasList();
+  showToast('Área agregada ✓');
+}
+
+// ── JD PDF ──
+function switchJdInput(mode) {
+  jdMode = mode;
+  document.getElementById('jdBtnText').classList.toggle('active', mode === 'text');
+  document.getElementById('jdBtnPdf').classList.toggle('active', mode === 'pdf');
+  document.getElementById('jdInputText').style.display = mode === 'text' ? 'block' : 'none';
+  document.getElementById('jdInputPdf').style.display = mode === 'pdf' ? 'block' : 'none';
+}
+
+function handleJdPdfUpload(event) {
+  const file = event.target.files[0];
+  if (!file || file.type !== 'application/pdf') { showToast('Solo se aceptan PDFs'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    jdPdfBase64 = e.target.result.split(',')[1];
+    document.getElementById('jdPdfLoaded').style.display = 'flex';
+    document.getElementById('jdPdfDropzone').style.display = 'none';
+    document.getElementById('jdPdfLoadedName').innerHTML = '📄 ' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+function clearJdPdf() {
+  jdPdfBase64 = null;
+  jdPdfText = null;
+  document.getElementById('jdPdfFileInput').value = '';
+  document.getElementById('jdPdfLoaded').style.display = 'none';
+  document.getElementById('jdPdfDropzone').style.display = 'flex';
+}
+
+// ── INPUT TOGGLE ──
+function switchInput(mode) {
+  inputMode = mode;
+  document.getElementById('btnText').classList.toggle('active', mode === 'text');
+  document.getElementById('btnPdf').classList.toggle('active', mode === 'pdf');
+  document.getElementById('inputText').style.display = mode === 'text' ? 'block' : 'none';
+  document.getElementById('inputPdf').style.display = mode === 'pdf' ? 'block' : 'none';
+}
+
+// ── PDF HANDLING ──
+function handlePdfUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.type !== 'application/pdf') { showToast('Solo se aceptan archivos PDF'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    pdfBase64 = e.target.result.split(',')[1];
+    document.getElementById('pdfLoaded').style.display = 'flex';
+    document.getElementById('pdfDropzone').style.display = 'none';
+    document.getElementById('pdfLoadedName').innerHTML = '📄 ' + file.name;
+  };
+  reader.onerror = () => showToast('Error al leer el archivo');
+  reader.readAsDataURL(file);
+}
+
+function clearPdf() {
+  pdfBase64 = null;
+  document.getElementById('pdfFileInput').value = '';
+  document.getElementById('pdfLoaded').style.display = 'none';
+  document.getElementById('pdfDropzone').style.display = 'flex';
+}
+
+// Drag & drop
+document.addEventListener('DOMContentLoaded', () => {
+  const zone = document.getElementById('pdfDropzone');
+  if (!zone) return;
+  zone.addEventListener('dragover', (e) => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+      document.getElementById('pdfFileInput').files = e.dataTransfer.files;
+      handlePdfUpload({ target: { files: [file] } });
+    }
+  });
+});
+
+// ── QUARTILE MAP ──
+const quartileMap = {
+  "1.1": { desc: "Analyst en desarrollo", range: "Necesita seguimiento constante del coordinador" },
+  "1.2": { desc: "Analyst autónomo", range: "Trabaja con autonomía, comunica bien" },
+  "1.3": { desc: "Analyst referente", range: "Referente del rol, ayuda a sus compañeros" },
+  "1.4": { desc: "Analyst senior", range: "Define accionables, resuelve sin escalar" },
+  "2.1": { desc: "Crew junior", range: "Gestiona su cuenta con autonomía básica" },
+  "2.2": { desc: "Crew consolidado", range: "Ejecuta a la perfección, detecta y escala problemas" },
+  "2.3": { desc: "Crew senior", range: "Toma proyectos con potencial, autonomía 100%" },
+  "2.4": { desc: "Crew referente", range: "Referente para el rol, visión estratégica" },
+  "2.5": { desc: "Referente técnico emergente", range: "Mentor técnico, propone mejoras transversales" },
+  "2.6": { desc: "Referente técnico consolidado", range: "Estandariza procesos, detecta cuellos de botella" },
+  "3.1": { desc: "Leader junior", range: "Distribuye cuentas, participa en contratación" },
+  "3.2": { desc: "Leader consolidado", range: "Trabaja estratégicamente con el plan de contratación" },
+  "3.3": { desc: "Leader senior", range: "Referente para otros líderes, mejora continua" },
+};
+
+// ── INITIAL ROLE (Social Media) ──
+const initialRole = {
+  id: "role_sm_001",
+  name: "Social Media Manager",
+  area: "Social Media",
+  jd: `We Are busca un Responsable de Social Media altamente motivado para liderar estrategias en redes sociales enfocadas en el crecimiento del negocio.
+
+Responsabilidades:
+- Desarrollar y ejecutar estrategias de redes sociales para las marcas cliente
+- Gestionar y planificar el calendario de contenidos
+- Coordinar con equipos internos para la correcta implementación de campañas
+- Analizar rendimiento y hacer recomendaciones basadas en datos
+- Colaborar estrechamente con los clientes para ajustar estrategias
+
+Requisitos:
+- Experiencia en Meta, Twitter, LinkedIn, TikTok y YouTube
+- Dominio de herramientas de gestión de redes sociales
+- Capacidad de análisis de KPIs específicos del área
+- Uso avanzado de Meta Business, Google Analytics, Metricool
+- Capacidad para crear reportes de performance con insights accionables
+- Habilidad en redacción creativa adaptada a diferentes plataformas
+- Conocimiento de SEO en redes sociales
+- Habilidad para coordinar con clientes en reuniones semanales`
+};
+
+roles.push(initialRole);
+renderRoles();
+renderRoleGrid();
+renderAreaSelect();
+
+// ── PAGES ──
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.tab-btn')[page === 'evaluate' ? 0 : page === 'roles' ? 1 : 2].classList.add('active');
+  if (page === 'history') renderHistory();
+}
+
+// ── ROLE GRID ──
+function renderRoleGrid() {
+  const grid = document.getElementById('roleGrid');
+  const noMsg = document.getElementById('noRolesMsg');
+  if (roles.length === 0) {
+    grid.innerHTML = '';
+    grid.appendChild(noMsg);
+    noMsg.style.display = 'block';
+    return;
+  }
+  noMsg.style.display = 'none';
+  grid.innerHTML = '';
+  roles.forEach(role => {
+    const chip = document.createElement('div');
+    chip.className = 'role-chip' + (selectedRoleId === role.id ? ' selected' : '');
+    chip.innerHTML = `<div class="role-chip-name">${role.name}</div><div class="role-chip-area">${role.area}</div>`;
+    chip.onclick = () => selectRole(role.id);
+    grid.appendChild(chip);
+  });
+}
+
+function selectRole(id) {
+  selectedRoleId = id;
+  renderRoleGrid();
+  const role = roles.find(r => r.id === id);
+  if (role) {
+    document.getElementById('previewName').textContent = role.name + ' · ' + role.area;
+    document.getElementById('previewJd').textContent = role.jd.substring(0, 180) + '...';
+    document.getElementById('rolePreview').classList.add('show');
+  }
+}
+
+// ── ROLE CRUD ──
+function openRoleModal(id) {
+  editingRoleId = id || null;
+  jdPdfBase64 = null;
+  jdPdfText = null;
+  jdMode = 'text';
+  document.getElementById('modalTitle').textContent = id ? 'Editar Rol' : 'Agregar Rol';
+  // Reset JD input mode
+  switchJdInput('text');
+  clearJdPdf();
+  renderAreaSelect();
+  if (id) {
+    const role = roles.find(r => r.id === id);
+    document.getElementById('modalRoleName').value = role.name;
+    // set area
+    const sel = document.getElementById('modalRoleArea');
+    if ([...sel.options].some(o => o.value === role.area)) sel.value = role.area;
+    else { areas.push(role.area); renderAreaSelect(); sel.value = role.area; }
+    document.getElementById('modalRoleJD').value = role.jd || '';
+  } else {
+    document.getElementById('modalRoleName').value = '';
+    document.getElementById('modalRoleJD').value = '';
+  }
+  document.getElementById('roleModal').classList.add('open');
+}
+
+function closeRoleModal() {
+  document.getElementById('roleModal').classList.remove('open');
+  editingRoleId = null;
+}
+
+async function saveRole() {
+  const name = document.getElementById('modalRoleName').value.trim();
+  const area = document.getElementById('modalRoleArea').value;
+
+  if (!name) { showToast('Completá el nombre del rol'); return; }
+
+  if (jdMode === 'text') {
+    const jd = document.getElementById('modalRoleJD').value.trim();
+    if (!jd) { showToast('Completá la job description'); return; }
+    finishSaveRole(name, area, jd, null);
+  } else {
+    if (!jdPdfBase64) { showToast('Subí el PDF de la JD'); return; }
+    // Store PDF base64 directly — used at eval time
+    finishSaveRole(name, area, '(JD cargada como PDF)', jdPdfBase64);
+  }
+}
+
+function finishSaveRole(name, area, jd, jdPdf) {
+  if (editingRoleId) {
+    const idx = roles.findIndex(r => r.id === editingRoleId);
+    roles[idx] = { ...roles[idx], name, area, jd, jdPdf: jdPdf || null };
+    showToast('Rol actualizado');
+  } else {
+    roles.push({ id: 'role_' + Date.now(), name, area, jd, jdPdf: jdPdf || null });
+    showToast('Rol agregado');
+  }
+  closeRoleModal();
+  renderRoles();
+  renderRoleGrid();
+}
+
+function deleteRole(id) {
+  if (!confirm('¿Eliminar este rol?')) return;
+  roles = roles.filter(r => r.id !== id);
+  if (selectedRoleId === id) { selectedRoleId = null; document.getElementById('rolePreview').classList.remove('show'); }
+  renderRoles();
+  renderRoleGrid();
+  showToast('Rol eliminado');
+}
+
+function renderRoles() {
+  const list = document.getElementById('rolesList');
+  if (roles.length === 0) { list.innerHTML = '<div class="empty-roles-msg">No hay roles cargados aún.</div>'; return; }
+  list.innerHTML = '';
+  roles.forEach(role => {
+    const item = document.createElement('div');
+    item.className = 'role-item';
+    item.innerHTML = `
+      <div class="role-item-header" onclick="toggleRoleBody('rb_${role.id}')">
+        <div class="role-item-meta">
+          <div class="role-item-name">${role.name}</div>
+          <div class="role-item-area">${role.area}</div>
+        </div>
+        <div class="role-item-actions">
+          <button class="icon-btn" onclick="event.stopPropagation(); openRoleModal('${role.id}')">Editar</button>
+          <button class="icon-btn danger" onclick="event.stopPropagation(); deleteRole('${role.id}')">Eliminar</button>
+        </div>
+      </div>
+      <div class="role-item-body" id="rb_${role.id}">
+        <div class="jd-display">${role.jd}</div>
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+function toggleRoleBody(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('open');
+}
+
+// ── ANALYZE ──
+async function analyzeInterview() {
+  if (!selectedRoleId) { showToast('Seleccioná un rol primero'); return; }
+  const candidateName = document.getElementById('candidateName').value.trim() || 'Candidato sin nombre';
+
+  if (inputMode === 'text') {
+    const transcript = document.getElementById('transcriptInput').value.trim();
+    if (!transcript || transcript.length < 50) { showToast('La transcripción es muy corta para evaluar'); return; }
+  } else {
+    if (!pdfBase64) { showToast('Subí un PDF primero'); return; }
+  }
+
+  const role = roles.find(r => r.id === selectedRoleId);
+
+  document.getElementById('analyzeBtn').style.display = 'none';
+  document.getElementById('resultCard').classList.remove('show');
+  const loading = document.getElementById('loadingState');
+  loading.classList.add('show');
+
+  const steps = ['Leyendo transcripción...', 'Comparando con la job description...', 'Mapeando al framework de cuartiles...', 'Generando evaluación final...'];
+  let step = 0;
+  const stepInterval = setInterval(() => {
+    if (step < steps.length) document.getElementById('loadingStep').textContent = steps[step++];
+  }, 1500);
+
+  const quartileContext = Object.entries(quartileMap).map(([k, v]) => `- Cuartil ${k}: ${v.desc} — ${v.range}`).join('\n');
+
+  const promptText = `Sos un experto en RRHH y evaluación de talento para We Are, una agencia aceleradora de ecommerce en Argentina.
+
+Tu tarea es evaluar a un candidato para el rol de "${role.name}" (área: ${role.area}) basándote en la transcripción de su entrevista${inputMode === 'pdf' ? ' (adjunta como PDF)' : ''}.
+
+== JOB DESCRIPTION DEL ROL ==
+${role.jd}
+
+== FRAMEWORK DE CUARTILES DE WE ARE ==
+Los cuartiles van del 1.1 al 3.3 y representan el nivel de autonomía, liderazgo y expertise:
+${quartileContext}
+
+Los cuartiles 1.x son Analysts, 2.x son Crew, 3.x son Leaders.
+- Cuartil 1.x: ejecutores que necesitan acompañamiento
+- Cuartil 2.x: autónomos con capacidad de tomar cuentas y resolver
+- Cuartil 3.x: líderes con visión estratégica y gestión de equipo
+
+${inputMode === 'text' ? `== TRANSCRIPCIÓN DE LA ENTREVISTA ==\n${document.getElementById('transcriptInput').value.trim()}` : ''}
+
+== INSTRUCCIÓN ==
+Analizá la entrevista y respondé ÚNICAMENTE con un objeto JSON válido, sin backticks ni texto adicional, con esta estructura exacta:
+
+{
+  "verdict": "APTO",
+  "verdictLabel": "Apto para el rol",
+  "quartile": "2.2",
+  "quartileJustification": "Explicación breve de por qué este cuartil",
+  "summary": "Párrafo de 3-4 oraciones con el análisis general del candidato en relación al rol",
+  "scores": [
+    { "label": "Conocimiento técnico", "score": 7 },
+    { "label": "Autonomía y criterio", "score": 6 },
+    { "label": "Comunicación", "score": 8 },
+    { "label": "Orientación al cliente", "score": 7 },
+    { "label": "Visión estratégica", "score": 5 }
+  ],
+  "strengths": ["fortaleza 1", "fortaleza 2", "fortaleza 3"],
+  "gaps": ["gap 1", "gap 2", "gap 3"],
+  "followup": ["pregunta 1", "pregunta 2", "pregunta 3"]
+}
+
+verdict puede ser: "APTO", "POTENCIAL" o "NO APTO".
+verdictLabel puede ser: "Apto para el rol", "Potencial con desarrollo" o "No apto para el rol".
+Los scores van de 1 a 10. Sé específico y basate en evidencia de la transcripción, no en suposiciones.`;
+
+  // Build message content — can have up to 2 PDFs (JD + transcript) and/or text
+  let messageContent;
+  const hasJdPdf = !!role.jdPdf;
+  const hasTranscriptPdf = inputMode === 'pdf';
+
+  if (hasJdPdf || hasTranscriptPdf) {
+    messageContent = [];
+    if (hasJdPdf) messageContent.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: role.jdPdf } });
+    if (hasTranscriptPdf) messageContent.push({ type: "document", source: { type: "base64", media_type: "application/pdf", data: pdfBase64 } });
+    messageContent.push({ type: "text", text: promptText });
+  } else {
+    messageContent = promptText;
+  }
+
+  try {
+    const response = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: messageContent }]
+      })
+    });
+
+    const data = await response.json();
+    clearInterval(stepInterval);
+    loading.classList.remove('show');
+
+    const rawText = data.content[0].text;
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+
+    currentResult = { ...result, candidateName, role: role.name, date: document.getElementById('interviewDate').value || new Date().toISOString().split('T')[0] };
+    renderResult(currentResult);
+
+  } catch (err) {
+    clearInterval(stepInterval);
+    loading.classList.remove('show');
+    document.getElementById('analyzeBtn').style.display = 'flex';
+    showToast('Error al procesar. Intentá de nuevo.');
+    console.error(err);
+  }
+}
+
+function renderResult(r) {
+  document.getElementById('resultName').textContent = r.candidateName;
+  document.getElementById('resultRole').textContent = r.role + ' · ' + r.date;
+
+  const badge = document.getElementById('verdictBadge');
+  badge.textContent = r.verdictLabel;
+  badge.className = 'verdict-badge ' + (r.verdict === 'APTO' ? 'verdict-apto' : r.verdict === 'POTENCIAL' ? 'verdict-potencial' : 'verdict-no-apto');
+
+  document.getElementById('quartileNum').textContent = r.quartile;
+  const qInfo = quartileMap[r.quartile] || { desc: r.quartileJustification, range: '' };
+  document.getElementById('quartileDesc').textContent = qInfo.desc;
+  document.getElementById('quartileRange').textContent = r.quartileJustification;
+
+  document.getElementById('resultSummary').textContent = r.summary;
+
+  const scoreRow = document.getElementById('scoreRow');
+  scoreRow.innerHTML = '';
+  (r.scores || []).forEach(s => {
+    const pct = (s.score / 10) * 100;
+    scoreRow.innerHTML += `
+      <div class="score-item">
+        <div class="score-item-label">${s.label}</div>
+        <div class="score-bar-wrap"><div class="score-bar" style="width:${pct}%"></div></div>
+        <div class="score-val">${s.score}/10</div>
+      </div>`;
+  });
+
+  const sl = document.getElementById('strengthsList');
+  sl.innerHTML = (r.strengths || []).map(s => `<li>${s}</li>`).join('');
+  const gl = document.getElementById('gapsList');
+  gl.innerHTML = (r.gaps || []).map(g => `<li>${g}</li>`).join('');
+  const fl = document.getElementById('followupList');
+  fl.innerHTML = (r.followup || []).map(f => `<li>${f}</li>`).join('');
+
+  document.getElementById('resultCard').classList.add('show');
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function saveToHistory() {
+  if (!currentResult) return;
+  history.unshift({ ...currentResult, savedAt: new Date().toLocaleString('es-AR') });
+  showToast('Guardado en historial ✓');
+}
+
+function resetEval() {
+  document.getElementById('resultCard').classList.remove('show');
+  document.getElementById('analyzeBtn').style.display = 'flex';
+  document.getElementById('transcriptInput').value = '';
+  document.getElementById('candidateName').value = '';
+  selectedRoleId = null;
+  currentResult = null;
+  renderRoleGrid();
+  document.getElementById('rolePreview').classList.remove('show');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function printResult() {
+  window.print();
+}
+
+// ── HISTORY ──
+function renderHistory() {
+  const el = document.getElementById('historyContent');
+  if (history.length === 0) {
+    el.innerHTML = '<div class="history-empty"><div class="history-empty-icon">📋</div><div>No hay evaluaciones guardadas aún.</div></div>';
+    return;
+  }
+  el.innerHTML = '<div class="history-list">' + history.map((h, i) => `
+    <div class="history-item" onclick="viewHistoryItem(${i})">
+      <div class="history-item-left">
+        <div class="history-item-name">${h.candidateName}</div>
+        <div class="history-item-meta">${h.role} · ${h.date} · Guardado: ${h.savedAt}</div>
+      </div>
+      <div class="history-item-right">
+        <div class="history-quartile">Q${h.quartile}</div>
+        <div class="verdict-badge ${h.verdict === 'APTO' ? 'verdict-apto' : h.verdict === 'POTENCIAL' ? 'verdict-potencial' : 'verdict-no-apto'}">${h.verdictLabel}</div>
+      </div>
+    </div>`).join('') + '</div>';
+}
+
+function viewHistoryItem(i) {
+  currentResult = history[i];
+  showPage('evaluate');
+  document.getElementById('analyzeBtn').style.display = 'none';
+  renderResult(currentResult);
+}
+
+function clearHistory() {
+  if (!confirm('¿Limpiar todo el historial?')) return;
+  history = [];
+  renderHistory();
+  showToast('Historial limpiado');
+}
+
+// ── TOAST ──
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
